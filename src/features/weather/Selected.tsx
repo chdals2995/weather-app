@@ -5,6 +5,10 @@ import WeatherInfo from "../weather/WeatherInfo";
 import HourlyWeather from "../weather/HourlyWeather";
 import { getForecastByCity } from "../../shared/Weather";
 
+import BookmarkButton from "../bookmark/BookmarkButton";
+import { getBookmarks, addBookmark, removeBookmark } from "../bookmark/Bookmark";
+import type { BookmarkItem } from "../bookmark/Bookmark";
+
 type SelectedProps = {
   location?: string | null;
 };
@@ -26,6 +30,7 @@ export default function Selected({ location }: SelectedProps) {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState<WeatherState | null>(null);
   const [hourly, setHourly] = useState<HourlyItem[]>([]);
+  const [isBookmarked, setIsBookmarked] = useState(false); // 1️⃣ 즐겨찾기 상태
 
   const cityMap: Record<string, string> = {
   "서울특별시": "Seoul",
@@ -52,6 +57,14 @@ export default function Selected({ location }: SelectedProps) {
     const date = new Date(dt * 1000);
     return `${date.getHours()}시`;
   }
+
+  // 2️⃣ 즐겨찾기 상태 초기화
+  useEffect(() => {
+    if (!city) return;
+    const bookmarks = getBookmarks();
+    const exists = bookmarks.some((b) => b.city === city);
+    setIsBookmarked(exists);
+  }, [city]);
 
   useEffect(() => {
     if (!location) return;
@@ -97,12 +110,31 @@ export default function Selected({ location }: SelectedProps) {
     fetchWeather();
   }, [location]);
 
+  // 3️⃣ 즐겨찾기 토글 핸들러
+  const handleBookmarkToggle = () => {
+    if (!weather || !city) return;
+
+    const item: BookmarkItem = {
+      city,
+      lat: 0,
+      lon: 0,
+  };
+
+    if (isBookmarked) {
+      removeBookmark(city);
+    } else {
+      addBookmark(item);
+    }
+    setIsBookmarked(!isBookmarked);
+  };
+
   if (!location) return <div>해당 장소의 정보가 제공되지 않습니다.</div>;
 
   return (
     <div>
         <div className="flex justify-between">
             <p>검색한 위치: {city}</p>
+            <BookmarkButton city={city} />
         </div>
 
       {weather && (
