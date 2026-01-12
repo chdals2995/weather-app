@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import WeatherInfo from "../weather/WeatherInfo";
 import HourlyWeather from "../weather/HourlyWeather";
-import { getForecastByCity } from "../../shared/Weather";
+import { getForecastByCoord } from "../../shared/Weather";
+
+import BookmarkButton from "../bookmark/BookmarkButton";
+import BookmarkModal from "../bookmark/BookmarkModal";
+import { getBookmarks, addBookmark, removeBookmark } from "../bookmark/Bookmark";
+import type { BookmarkItem } from "../bookmark/Bookmark";
+import { cityCoords } from "../../shared/CityMaps";
 
 type SelectedProps = {
   location?: string | null;
@@ -26,26 +32,9 @@ export default function Selected({ location }: SelectedProps) {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState<WeatherState | null>(null);
   const [hourly, setHourly] = useState<HourlyItem[]>([]);
-
-  const cityMap: Record<string, string> = {
-  "서울특별시": "Seoul",
-  "부산광역시": "Busan",
-  "대구광역시": "Daegu",
-  "인천광역시": "Incheon",
-  "광주광역시": "Gwangju",
-  "대전광역시": "Daejeon",
-  "울산광역시": "Ulsan",
-  "세종특별자치시": "Sejong",
-  "경기도": "Gyeonggi",
-  "강원도": "Gangwon",
-  "충청북도": "Chungcheongbuk",
-  "충청남도": "Chungcheongnam",
-  "전라북도": "Jeonbuk",
-  "전라남도": "Jeonnam",
-  "경상북도": "Gyeongbuk",
-  "경상남도": "Gyeongnam",
-  "제주특별자치도": "Jeju"
-};
+  const [isBookmarked, setIsBookmarked] = useState(false); // 1️⃣ 즐겨찾기 상태
+  const [showModal, setShowModal] = useState(false); // 모달 상태
+  const [alias, setAlias] = useState<string | null>(null);
 
   // 시간 표시 함수
   function formatTime(dt: number) {
@@ -53,19 +42,57 @@ export default function Selected({ location }: SelectedProps) {
     return `${date.getHours()}시`;
   }
 
+  // 2️⃣ 즐겨찾기 상태 초기화
+  useEffect(() => {
+    if (!city) return;
+    const bookmark = getBookmarks().find(b => b.city === city);
+
+  if (bookmark) {
+    setIsBookmarked(true);
+
+    if (bookmark.alias && bookmark.alias !== bookmark.city) {
+      setAlias(bookmark.alias);
+    } else {
+      setAlias(null);
+    }
+  } else {
+    setIsBookmarked(false);
+    setAlias(null);
+  }
+}, [city]);
+
+  // 날씨 정보 가져오기
   useEffect(() => {
     if (!location) return;
 
     async function fetchWeather() {
       try {
-        const cityKor = location!.split("-")[0]; // 한글 주소 영문 변환
-        const cityEng = cityMap[cityKor] || cityKor; // 없으면 한글 그대로
+        // location: "서울특별시-강남구-역삼동" 형태
+        const parts = location!.split("-");
 
-        // API 호출
-        const forecastData = await getForecastByCity(cityEng);
+        const cityKor = parts[0]; // 도 / 광역시
+        const guKor = parts[1];   // 시 / 군 / 구
+        const dongKor = parts[2]; // 동 / 읍 / 면
 
-        // 도시명(영문)
-        setCity(forecastData.city.name);
+        // ✅ 화면에 보여줄 이름 (항상 한글)
+      const displayCity = parts.slice(0, 2).join(" ");
+
+        // ⬇️ 가장 하위 행정단위부터 좌표 찾기
+      const coord =
+        (dongKor && cityCoords[dongKor]) ||
+        (guKor && cityCoords[guKor]) ||
+        cityCoords[cityKor];
+
+      if (!coord) {
+        console.error("좌표를 찾을 수 없음:", location);
+        return;
+      }
+
+      // ✅ 좌표 기반으로만 호출
+      const forecastData = await getForecastByCoord(coord.lat, coord.lon);
+
+      // 도시명
+      setCity(displayCity);
 
         // 현재 날씨: 첫 번째 데이터
         const nowData = forecastData.list[0];
@@ -97,13 +124,58 @@ export default function Selected({ location }: SelectedProps) {
     fetchWeather();
   }, [location]);
 
+  // 모달 열기
+  const handleBookmarkClick = () => {
+
+    if (isBookmarked) {
+    // 이미 즐겨찾기 되어있으면 바로 해제
+    removeBookmark(city);
+    setIsBookmarked(false);
+  } else {
+    // 즐겨찾기 안 되어 있으면 모달 열기
+    setShowModal(true);
+  }
+  };
+
+  // 모달에서 저장
+  const handleSaveBookmark = (alias: string) => {
+    if (!weather || !location) return;
+
+    const item: BookmarkItem = {
+      city,
+      location,
+      alias,
+      lat: 0,
+      lon: 0,
+      temp: Math.round(weather.temp),
+      tempMin: Math.round(weather.tempMin),
+      tempMax: Math.round(weather.tempMax),
+      weather: weather.main,
+    };
+
+    addBookmark(item) // 즐겨찾기 저장
+    setIsBookmarked(true); // 버튼 상태 갱신
+    setShowModal(false); // 저장 후 모달 닫기
+  };
+
   if (!location) return <div>해당 장소의 정보가 제공되지 않습니다.</div>;
 
   return (
     <div>
         <div className="flex justify-between">
-            <p>검색한 위치: {city}</p>
-        </div>
+            <div>
+              {alias && (
+                <p className="font-bold text-lg">{alias}</p>
+              )}
+                <p className="text-sm text-gray-500">{city}</p>
+            </div>
+
+            <BookmarkButton
+              city={city}
+              onClick={handleBookmarkClick}
+              bookmarked={isBookmarked}
+            />
+          </div>
 
       {weather && (
         <WeatherInfo
@@ -118,6 +190,15 @@ export default function Selected({ location }: SelectedProps) {
       <section>
         <HourlyWeather hourly={hourly} />
       </section>
+
+      {/* 모달 */}
+      {showModal && (
+        <BookmarkModal
+          initialName={city}
+          onClose={() => setShowModal(false)}
+          onSave={handleSaveBookmark}
+        />
+      )}
     </div>
   );
 }

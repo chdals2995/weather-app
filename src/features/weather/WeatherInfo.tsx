@@ -9,6 +9,7 @@ import snow from "../../assets/icons/snow.png"
 
 type WeatherInfoProps = {
   city: string;
+  alias?: string;
   temp: number;
   tempMin: number;
   tempMax: number;
@@ -39,6 +40,8 @@ function mapWeatherMainToIcon(main: string, isDay: boolean = true) {
 }
 
 export default function WeatherInfo({
+  city,
+  alias,
   temp,
   tempMin,
   tempMax,
@@ -49,13 +52,17 @@ export default function WeatherInfo({
             {/* 현재 위치의 날씨 표시 */}
             <div>
                 <span>
-                    {tempMin}° / {tempMax}°
+                    {tempMin}°c / {tempMax}°c
                 </span>
-                <span>별칭</span>
+                {alias && alias !== city && (
+                <span className="text-sm text-gray-500">
+                  {alias}
+                </span>
+              )}
             </div>
             <div>
                 <img src={mapWeatherMainToIcon(main)} alt={main} />
-                <span>{temp}°</span>
+                <span>{temp}°c</span>
             </div>
         </div>
     );
