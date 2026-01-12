@@ -8,12 +8,12 @@ if (!API_KEY) {
   console.error("❌ VITE_WEATHER_API_KEY가 없습니다 (.env 확인)");
 }
 
-export type WeatherState = {
-  temp: number;
-  tempMin: number;
-  tempMax: number;
-  main: string;
-};
+// export type WeatherState = {
+//   temp: number;
+//   tempMin: number;
+//   tempMax: number;
+//   main: string;
+// };
 
 // 현재 위치(위도, 경도) 기준 현재 날씨
 export async function getCurrentByCoord(lat: number, lon: number ) {
