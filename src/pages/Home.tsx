@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SearchBar from "../features/search/SearchBar";
 import Selected from "../features/weather/Selected";
+import Current from "../features/weather/Current";
 
 export default function Home(){
     const [selectedLocation, setSelectedLocation] = useState("");
@@ -17,6 +18,7 @@ export default function Home(){
             </section>
             {/* 상단 */}
             <section className="w-full h-100 border-2 border-red-500">
+                <Current/>
             </section>
             {/* 검색 */}
             <section className="w-full h-20 border-2 border-red-500">
