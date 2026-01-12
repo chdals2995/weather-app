@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import WeatherInfo from "../weather/WeatherInfo";
 import HourlyWeather from "../weather/HourlyWeather";
-import { getForecastByCity } from "../../shared/Weather";
+import { getForecastByCity, getForecastByCoord } from "../../shared/Weather";
 
 import BookmarkButton from "../bookmark/BookmarkButton";
 import BookmarkModal from "../bookmark/BookmarkModal";
 import { getBookmarks, addBookmark, removeBookmark } from "../bookmark/Bookmark";
 import type { BookmarkItem } from "../bookmark/Bookmark";
+import { cityCoords } from "../../shared/CityMaps";
 
 type SelectedProps = {
   location?: string | null;
@@ -34,26 +35,6 @@ export default function Selected({ location }: SelectedProps) {
   const [isBookmarked, setIsBookmarked] = useState(false); // 1️⃣ 즐겨찾기 상태
   const [showModal, setShowModal] = useState(false); // 모달 상태
 
-  const cityMap: Record<string, string> = {
-  "서울특별시": "Seoul",
-  "부산광역시": "Busan",
-  "대구광역시": "Daegu",
-  "인천광역시": "Incheon",
-  "광주광역시": "Gwangju",
-  "대전광역시": "Daejeon",
-  "울산광역시": "Ulsan",
-  "세종특별자치시": "Sejong",
-  "경기도": "Gyeonggi",
-  "강원도": "Gangwon",
-  "충청북도": "Chungcheongbuk",
-  "충청남도": "Chungcheongnam",
-  "전라북도": "Jeonbuk",
-  "전라남도": "Jeonnam",
-  "경상북도": "Gyeongbuk",
-  "경상남도": "Gyeongnam",
-  "제주특별자치도": "Jeju"
-};
-
   // 시간 표시 함수
   function formatTime(dt: number) {
     const date = new Date(dt * 1000);
@@ -72,11 +53,22 @@ export default function Selected({ location }: SelectedProps) {
 
     async function fetchWeather() {
       try {
-        const cityKor = location!.split("-")[0]; // 한글 주소 영문 변환
-        const cityEng = cityMap[cityKor] || cityKor; // 없으면 한글 그대로
+        // location: "서울특별시-강남구-역삼동" 형태
+        const cityKor = location!.split("-")[0]; // 시
+        const guKor = location!.split("-")[1]; // 구 (있으면)
+        const dongKor = location!.split("-")[2]; // 동 (있으면)
 
-        // API 호출
-        const forecastData = await getForecastByCity(cityEng);
+        // 먼저 좌표를 확인
+        let coord = cityCoords[dongKor] || cityCoords[guKor] || cityCoords[cityKor];
+
+        let forecastData;
+        if (coord) {
+          // 좌표 기반 API 호출
+          forecastData = await getForecastByCoord(coord.lat, coord.lon);
+        } else {
+          // fallback: 이름 기반 API 호출
+          forecastData = await getForecastByCity(cityKor);
+        }
 
         // 도시명(영문)
         setCity(forecastData.city.name);
@@ -133,12 +125,14 @@ export default function Selected({ location }: SelectedProps) {
       alias,
       lat: 0,
       lon: 0,
-      temp: weather.temp,
+      temp: Math.round(weather.temp),
+      tempMin: Math.round(weather.tempMin),
+      tempMax: Math.round(weather.tempMax),
       weather: weather.main,
     };
 
-    addBookmark(item);
-    setIsBookmarked(true);
+    addBookmark(item) // 즐겨찾기 저장
+    setIsBookmarked(true); // 버튼 상태 갱신
     setShowModal(false); // 저장 후 모달 닫기
   };
 
@@ -148,7 +142,7 @@ export default function Selected({ location }: SelectedProps) {
     <div>
         <div className="flex justify-between">
             <p>검색한 위치: {city}</p>
-            <BookmarkButton city={city} onClick={handleBookmarkClick} />
+            <BookmarkButton city={city} onClick={handleBookmarkClick} showBookmarked={true} />
         </div>
 
       {weather && (

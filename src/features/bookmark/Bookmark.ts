@@ -6,6 +6,8 @@ export type BookmarkItem = {
   lat: number;
   lon: number;
   temp: number;
+  tempMin: number;
+  tempMax: number;
   weather: string;
 };
 

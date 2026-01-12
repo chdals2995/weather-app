@@ -1,8 +1,7 @@
 // BookmarkButton.tsx
 
 import { useState, useEffect } from "react";
-import { toggleBookmark, isBookmarked} from "./Bookmark";
-import type { BookmarkItem } from "./Bookmark";
+import { isBookmarked} from "./Bookmark";
 import bookmark from "../../assets/icons/bookmark.png"
 import fillMark from "../../assets/icons/fill_bookmark.png"
 
@@ -11,9 +10,19 @@ type BookmarkButtonProps = {
   lat?: number;
   lon?: number;
   onClick?: () => void;
+  active?: boolean;
+  showBookmarked?: boolean; // 검색 위치 즐겨찾기용
 };
 
-export default function BookmarkButton({ city, lat = 0, lon = 0 , onClick}: BookmarkButtonProps) {
+export default function BookmarkButton({
+  city,
+  lat = 0,
+  lon = 0,
+  onClick,
+  active = false,
+  showBookmarked = false,
+}: BookmarkButtonProps) {
+  
   const [bookmarked, setBookmarked] = useState(false);
 
   useEffect(() => {
@@ -26,11 +35,23 @@ export default function BookmarkButton({ city, lat = 0, lon = 0 , onClick}: Book
     setBookmarked(isBookmarked(city)); // 즐겨찾기 아이콘 상태 갱신
   };
 
+  // 아이콘 결정
+  let icon = bookmark;
+  if (active) icon = fillMark;          // 홈 상단 메뉴 열림
+  else if (showBookmarked && bookmarked) icon = fillMark; // 검색 위치 즐겨찾기 등록됨
+
+  // alt 결정
+  let altText = "";
+  if (active) altText = "즐겨찾기 목록 닫기";
+  else if (showBookmarked && bookmarked) altText = "즐겨찾기 해제";
+  else if (showBookmarked && !bookmarked) altText = "즐겨찾기 등록";
+  else altText = "즐겨찾기 목록 열기";
+
   return (
     <button onClick={handleClick}>
-      <img 
-        src={bookmarked ? fillMark : bookmark} 
-        alt={bookmarked ? "즐겨찾기 됨" : "즐겨찾기 안됨"} 
+      <img
+        src={icon}
+        alt={altText}
         style={{ width: 24, height: 24 }}
       />
     </button>
