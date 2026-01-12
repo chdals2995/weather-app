@@ -23,20 +23,21 @@ export async function getCurrentByCoord(lat: number, lon: number ) {
   return res.json();
 }
 
-// 도시명 기준 현재 날씨 (검색 / 즐겨찾기용)
-export async function getCurrentByCity(city: string) {
-  const res = await fetch(
-    `${BASE_URL}/weather?q=${city}&units=metric&appid=${API_KEY}`
-  );
+// 좌표(위도/경도) 없이 한글 주소 → lat/lon 얻기 (Geocoding API)
+// export async function getCoordByCityName(city: string): Promise<{ lat: number; lon: number }>{
+//   const res = await fetch(
+//     `http://api.openweathermap.org/geo/1.0/direct?q=${city},KR&limit=1&appid=${API_KEY}`
+//   );
+//   if (!res.ok) throw new Error("좌표 조회 실패");
+//   const data = await res.json();
+//   if (!data[0] || data[0].lat === undefined || data[0].lon === undefined) {
+//   if (!data[0]) throw new Error("유효한 좌표 없음");
+// }
+//   return { lat: data[0].lat, lon: data[0].lon };
+// }
 
-  if (!res.ok) {
-    throw new Error("해당 위치 날씨 조회 실패");
-  }
 
-  return res.json();
-}
-
-// 3시간 단위 예보 (최대 5일치)
+// 3시간 단위 날씨 (최대 5일치)
 export async function getForecastByCoord(lat: number, lon: number) {
   const res = await fetch(
     `${BASE_URL}/forecast?&lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
@@ -56,7 +57,7 @@ export async function getForecastByCity(city: string) {
   );
 
   if (!res.ok) {
-    throw new Error("도시별 시간대별 날씨 조회 실패");
+    throw new Error("도시별 날씨 조회 실패");
   }
 
   return res.json();

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import WeatherInfo from "./WeatherInfo";
 import HourlyWeather from "./HourlyWeather";
-import { getCurrentByCoord, getForecastByCoord } from "../../shared/weather";
+import { getCurrentByCoord, getForecastByCoord } from "../../shared/Weather";
 
 
 export default function Current() {
