@@ -163,13 +163,7 @@ export default function Selected({ location }: SelectedProps) {
   return (
     <div>
         <div className="flex justify-between">
-            <div>
-              {alias && (
-                <p className="font-bold text-lg">{alias}</p>
-              )}
-                <p className="text-sm text-gray-500">{city}</p>
-            </div>
-
+            <p className="text-sm">검색한 위치 : {city}</p>
             <BookmarkButton
               city={city}
               onClick={handleBookmarkClick}
@@ -180,6 +174,7 @@ export default function Selected({ location }: SelectedProps) {
       {weather && (
         <WeatherInfo
           city={city}
+          alias={alias ?? undefined}
           temp={weather.temp}
           tempMin={weather.tempMin}
           tempMax={weather.tempMax}

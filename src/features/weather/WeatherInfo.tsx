@@ -54,11 +54,11 @@ export default function WeatherInfo({
                 <span>
                     {tempMin}°c / {tempMax}°c
                 </span>
-                {alias && alias !== city && (
-                <span className="text-sm text-gray-500">
-                  {alias}
-                </span>
-              )}
+                {alias ? (
+                  <p className="font-bold text-lg">{alias}</p>
+                ) : (
+                  <p className="font-bold text-lg"></p>
+                )}
             </div>
             <div>
                 <img src={mapWeatherMainToIcon(main)} alt={main} />

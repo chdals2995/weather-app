@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import WeatherInfo from "./WeatherInfo";
 import HourlyWeather from "./HourlyWeather";
 import { getCurrentByCoord, getForecastByCoord } from "../../shared/Weather";
+import { cityCoords } from "../../shared/CityMaps";
 
 
 export default function Current() {
@@ -29,14 +30,34 @@ export default function Current() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;
 
-      // 현재 날씨
+      // 한글 도시명
+      let cityKor = "";
+
+      Object.entries(cityCoords).forEach(([name, coord]) => {
+        if (
+          Math.abs(coord.lat - latitude) < 0.05 &&
+          Math.abs(coord.lon - longitude) < 0.05
+        ) {
+          cityKor = name;
+        }
+      });
+
+      setCity(cityKor);
+
+      // 현재 위치 날씨 기온
       const currentData = await getCurrentByCoord(latitude, longitude);
-      setCity(currentData.name);
+
+      const forecastData = await getForecastByCoord(latitude, longitude);
+
+      const temps = forecastData.list.slice(0, 8);
+      const tempMin = Math.min(...temps.map((i: any) => i.main.temp_min));
+      const tempMax = Math.max(...temps.map((i: any) => i.main.temp_max));
+
       setWeather({
-        temp: currentData.main.temp,
-        tempMin: currentData.main.temp_min,
-        tempMax: currentData.main.temp_max,
-        main: currentData.main,
+        temp: Math.round(currentData.main.temp),
+        tempMin: Math.round(tempMin),
+        tempMax: Math.round(tempMax),
+        main: currentData.weather[0].main,
       });
 
       // 3시간대별 날씨

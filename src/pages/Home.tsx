@@ -58,7 +58,7 @@ export default function Home(){
                 ) : (
                 <>
                 {/* 상단 (사용자 위치 현재 날씨/ 즐겨찾기 날씨) */}
-                    <section className="w-full h-100 border-2 border-red-500">
+                    <section className="w-full h-100 p-1 border-2 border-red-500">
                         <Current/>
                     </section>
                 {/* 검색창 */}
