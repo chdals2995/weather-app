@@ -8,6 +8,7 @@ import BookmarkButton from "../features/bookmark/BookmarkButton";
 import BookmarkList from "../features/bookmark/BookmarkList";
 import navi from "../assets/icons/navi.png";
 import fillNavi from "../assets/icons/fill_navi.png";
+import { isBookmarked } from "../features/bookmark/Bookmark";
 
 export default function Home(){
     const [selectedLocation, setSelectedLocation] = useState("");
@@ -27,6 +28,10 @@ export default function Home(){
     };
 
     const isHome = !selectedLocation && !showBookmarkList;
+    
+    // 즐겨찾기 날씨를 보여주고 있는지
+    const isSelectedBookmarked =
+    selectedLocation && isBookmarked(selectedLocation);
 
     return(
         <div className="h-screen flex flex-col">
@@ -41,10 +46,10 @@ export default function Home(){
                 </div>
                 <div className="w-10 flex justify-center"
                 onClick={() => setShowBookmarkList(!showBookmarkList)}>
-                    {/* BookmarkButton 예시: 현재 선택된 도시 없으면 빈 문자열 */}
+                    {/* BookmarkButton */}
                     <BookmarkButton
                     city=""
-                    bookmarked={showBookmarkList}
+                    bookmarked={!!isSelectedBookmarked}
                     onClick={() => setShowBookmarkList(prev => !prev)}
                     />
                 </div>

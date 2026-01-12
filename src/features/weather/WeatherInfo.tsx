@@ -40,7 +40,6 @@ function mapWeatherMainToIcon(main: string, isDay: boolean = true) {
 }
 
 export default function WeatherInfo({
-  city,
   alias,
   temp,
   tempMin,
@@ -60,7 +59,7 @@ export default function WeatherInfo({
                   <p className="font-bold text-lg"></p>
                 )}
             </div>
-            <div>
+            <div className="">
                 <img src={mapWeatherMainToIcon(main)} alt={main} />
                 <span>{temp}°c</span>
             </div>

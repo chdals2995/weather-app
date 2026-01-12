@@ -39,13 +39,13 @@ export function getBookmarks(): BookmarkItem[] {
 }
 
 // 특정 도시가 즐겨찾기인지 확인
-export function isBookmarked(city: string): boolean {
-  return bookmarks.some(b => b.city === city);
+export function isBookmarked(location: string): boolean {
+  return bookmarks.some(b => b.location === location);
 }
 
 // 즐겨찾기 추가
 export function addBookmark(item: BookmarkItem) {
-  if (!isBookmarked(item.city)) {
+  if (!isBookmarked(item.location)) {
     bookmarks.push(item);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
   }
@@ -75,15 +75,15 @@ export function updateBookmarkAlias(city: string, alias: string) {
 }
 
 // 즐겨찾기 삭제
-export function removeBookmark(city: string) {
-  bookmarks = bookmarks.filter(b => b.city !== city);
+export function removeBookmark(location: string) {
+  bookmarks = bookmarks.filter(b => b.location !== location);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
 }
 
 // 즐겨찾기 토글
 export function toggleBookmark(item: BookmarkItem) {
-  if (isBookmarked(item.city)) {
-    removeBookmark(item.city);
+  if (isBookmarked(item.location)) {
+    removeBookmark(item.location);
   } else {
     addBookmark(item);
   }

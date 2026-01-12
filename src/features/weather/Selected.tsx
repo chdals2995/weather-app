@@ -44,8 +44,8 @@ export default function Selected({ location }: SelectedProps) {
 
   // 2️⃣ 즐겨찾기 상태 초기화
   useEffect(() => {
-    if (!city) return;
-    const bookmark = getBookmarks().find(b => b.city === city);
+    if (!location) return;
+    const bookmark = getBookmarks().find(b => b.location === location);
 
   if (bookmark) {
     setIsBookmarked(true);
@@ -59,7 +59,7 @@ export default function Selected({ location }: SelectedProps) {
     setIsBookmarked(false);
     setAlias(null);
   }
-}, [city]);
+}, [location]);
 
   // 날씨 정보 가져오기
   useEffect(() => {
@@ -94,12 +94,17 @@ export default function Selected({ location }: SelectedProps) {
       // 도시명
       setCity(displayCity);
 
-        // 현재 날씨: 첫 번째 데이터
+        // 현재 날씨
         const nowData = forecastData.list[0];
+
+        const range = forecastData.list.slice(0, 8);
+        const tempMin = Math.min(...range.map((i: any) => i.main.temp_min));
+        const tempMax = Math.max(...range.map((i: any) => i.main.temp_max));
+
         setWeather({
-          temp: nowData.main.temp,
-          tempMin: Math.min(...forecastData.list.slice(0, 8).map((i: any) => i.main.temp_min)),
-          tempMax: Math.max(...forecastData.list.slice(0, 8).map((i: any) => i.main.temp_max)),
+          temp: Math.round(nowData.main.temp),
+          tempMin: Math.round(tempMin),
+          tempMax: Math.round(tempMax),
           main: nowData.weather[0].main,
         });
 
@@ -126,10 +131,11 @@ export default function Selected({ location }: SelectedProps) {
 
   // 모달 열기
   const handleBookmarkClick = () => {
+    if (!location) return;
 
     if (isBookmarked) {
     // 이미 즐겨찾기 되어있으면 바로 해제
-    removeBookmark(city);
+    removeBookmark(location);
     setIsBookmarked(false);
   } else {
     // 즐겨찾기 안 되어 있으면 모달 열기
