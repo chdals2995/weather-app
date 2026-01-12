@@ -149,7 +149,7 @@ export default function Selected({ location }: SelectedProps) {
     <div>
         <div className="flex justify-between">
             <p>검색한 위치: {city}</p>
-            <BookmarkButton city={city} onClick={handleBookmarkClick} showBookmarked={true} />
+            <BookmarkButton city={city} onClick={handleBookmarkClick} bookmarked={isBookmarked} />
         </div>
 
       {weather && (

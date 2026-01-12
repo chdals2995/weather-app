@@ -32,9 +32,11 @@ export default function Home(){
                 <div className="w-10 border-2 border-red-500"
                 onClick={() => setShowBookmarkList(!showBookmarkList)}>
                     {/* BookmarkButton 예시: 현재 선택된 도시 없으면 빈 문자열 */}
-                    <BookmarkButton city={selectedLocation || ""} 
-                    active={showBookmarkList} // 즐겨찾기 목록 열림 여부
-                    onClick={() => setShowBookmarkList(!showBookmarkList)}/>
+                    <BookmarkButton
+                    city=""
+                    bookmarked={showBookmarkList}
+                    onClick={() => setShowBookmarkList(prev => !prev)}
+                    />
                 </div>
             </section>
 

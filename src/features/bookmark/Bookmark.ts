@@ -50,6 +50,14 @@ export function addBookmark(item: BookmarkItem) {
   }
 }
 
+// 별칭 수정
+export function updateBookmarkAlias(city: string, alias: string) {
+  bookmarks = bookmarks.map(b =>
+    b.city === city ? { ...b, alias } : b
+  );
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
+}
+
 // 즐겨찾기 삭제
 export function removeBookmark(city: string) {
   bookmarks = bookmarks.filter(b => b.city !== city);
