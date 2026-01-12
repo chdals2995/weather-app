@@ -10,9 +10,10 @@ type BookmarkButtonProps = {
   city: string;
   lat?: number;
   lon?: number;
+  onClick?: () => void;
 };
 
-export default function BookmarkButton({ city, lat = 0, lon = 0 }: BookmarkButtonProps) {
+export default function BookmarkButton({ city, lat = 0, lon = 0 , onClick}: BookmarkButtonProps) {
   const [bookmarked, setBookmarked] = useState(false);
 
   useEffect(() => {
@@ -20,14 +21,13 @@ export default function BookmarkButton({ city, lat = 0, lon = 0 }: BookmarkButto
     setBookmarked(isBookmarked(city));
   }, [city]);
 
-  const handleToggle = () => {
-    const item: BookmarkItem = { city, lat, lon };
-    toggleBookmark(item); // Bookmark.ts에 구현된 toggle 함수 사용
-    setBookmarked(isBookmarked(city)); // 상태 갱신
+  const handleClick = () => {
+    if (onClick) onClick(); // Selected에서 즐겨찾기 모달 열기 또는 해제 처리
+    setBookmarked(isBookmarked(city)); // 즐겨찾기 아이콘 상태 갱신
   };
 
   return (
-    <button onClick={handleToggle}>
+    <button onClick={handleClick}>
       <img 
         src={bookmarked ? fillMark : bookmark} 
         alt={bookmarked ? "즐겨찾기 됨" : "즐겨찾기 안됨"} 

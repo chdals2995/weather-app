@@ -6,6 +6,7 @@ import HourlyWeather from "../weather/HourlyWeather";
 import { getForecastByCity } from "../../shared/Weather";
 
 import BookmarkButton from "../bookmark/BookmarkButton";
+import BookmarkModal from "../bookmark/BookmarkModal";
 import { getBookmarks, addBookmark, removeBookmark } from "../bookmark/Bookmark";
 import type { BookmarkItem } from "../bookmark/Bookmark";
 
@@ -31,6 +32,7 @@ export default function Selected({ location }: SelectedProps) {
   const [weather, setWeather] = useState<WeatherState | null>(null);
   const [hourly, setHourly] = useState<HourlyItem[]>([]);
   const [isBookmarked, setIsBookmarked] = useState(false); // 1️⃣ 즐겨찾기 상태
+  const [showModal, setShowModal] = useState(false); // 모달 상태
 
   const cityMap: Record<string, string> = {
   "서울특별시": "Seoul",
@@ -61,11 +63,10 @@ export default function Selected({ location }: SelectedProps) {
   // 2️⃣ 즐겨찾기 상태 초기화
   useEffect(() => {
     if (!city) return;
-    const bookmarks = getBookmarks();
-    const exists = bookmarks.some((b) => b.city === city);
-    setIsBookmarked(exists);
+    setIsBookmarked(getBookmarks().some(b => b.city === city));
   }, [city]);
 
+  // 날씨 정보 가져오기
   useEffect(() => {
     if (!location) return;
 
@@ -110,22 +111,35 @@ export default function Selected({ location }: SelectedProps) {
     fetchWeather();
   }, [location]);
 
-  // 3️⃣ 즐겨찾기 토글 핸들러
-  const handleBookmarkToggle = () => {
-    if (!weather || !city) return;
+  // 모달 열기
+  const handleBookmarkClick = () => {
+
+    if (isBookmarked) {
+    // 이미 즐겨찾기 되어있으면 바로 해제
+    removeBookmark(city);
+    setIsBookmarked(false);
+  } else {
+    // 즐겨찾기 안 되어 있으면 모달 열기
+    setShowModal(true);
+  }
+  };
+
+  // 모달에서 저장
+  const handleSaveBookmark = (alias: string) => {
+    if (!weather) return;
 
     const item: BookmarkItem = {
       city,
+      alias,
       lat: 0,
       lon: 0,
-  };
+      temp: weather.temp,
+      weather: weather.main,
+    };
 
-    if (isBookmarked) {
-      removeBookmark(city);
-    } else {
-      addBookmark(item);
-    }
-    setIsBookmarked(!isBookmarked);
+    addBookmark(item);
+    setIsBookmarked(true);
+    setShowModal(false); // 저장 후 모달 닫기
   };
 
   if (!location) return <div>해당 장소의 정보가 제공되지 않습니다.</div>;
@@ -134,7 +148,7 @@ export default function Selected({ location }: SelectedProps) {
     <div>
         <div className="flex justify-between">
             <p>검색한 위치: {city}</p>
-            <BookmarkButton city={city} />
+            <BookmarkButton city={city} onClick={handleBookmarkClick} />
         </div>
 
       {weather && (
@@ -150,6 +164,15 @@ export default function Selected({ location }: SelectedProps) {
       <section>
         <HourlyWeather hourly={hourly} />
       </section>
+
+      {/* 모달 */}
+      {showModal && (
+        <BookmarkModal
+          initialName={city}
+          onClose={() => setShowModal(false)}
+          onSave={handleSaveBookmark}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 // BookmarkList.tsx
 
-import { getBookmarks, BookmarkItem } from "../bookmark/Bookmark";
+import { getBookmarks } from "../bookmark/Bookmark";
 
 type BookmarkListProps = {
   onSelect: (city: string, lat: number, lon: number) => void;

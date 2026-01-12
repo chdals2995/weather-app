@@ -2,8 +2,11 @@
 
 export type BookmarkItem = {
   city: string;
+  alias?: string;
   lat: number;
   lon: number;
+  temp: number;
+  weather: string;
 };
 
 // 로컬스토리지 키
